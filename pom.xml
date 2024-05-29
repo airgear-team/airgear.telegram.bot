@@ -10,7 +10,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.airgear.location</groupId>
+    <groupId>com.airgear.telegram</groupId>
     <artifactId>airgear</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>airgear.location</name>
@@ -153,6 +153,12 @@
             <groupId>com.github.bithub7</groupId>
             <artifactId>airgear.model</artifactId>
             <version>v1.1.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-spring-boot-starter</artifactId>
+            <version>6.9.7.1</version>
         </dependency>
 
     </dependencies>
