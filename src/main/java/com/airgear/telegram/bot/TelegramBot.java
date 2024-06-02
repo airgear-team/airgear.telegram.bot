@@ -1,6 +1,10 @@
 package com.airgear.telegram.bot;
 
+
+import com.airgear.telegram.dto.GoodsResponse;
+import com.airgear.telegram.service.GoodsService;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -11,6 +15,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 @Data
 public class TelegramBot extends TelegramLongPollingBot {
+
     @Value("${telegrambots.bot.username}")
     private String botUsername;
 
@@ -18,6 +23,9 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String botToken;
 
     private boolean awaitingAnswer = false;
+
+    @Autowired
+    private GoodsService goodsService;
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -30,13 +38,21 @@ public class TelegramBot extends TelegramLongPollingBot {
                 awaitingAnswer = true;
             } else if (awaitingAnswer) {
                 if (messageText.equals("7")) {
-                    sendResponse(chatId, "Відповідь правильна! Тепер ви можете користуватись ботом.");
+                    sendResponse(chatId, "Відповідь правильна! Тепер ви можете користуватись ботом. Введіть ID оголошення для отримання інформації.");
                     awaitingAnswer = false;
                 } else {
                     sendResponse(chatId, "Неправильна відповідь. Спробуйте ще раз: 16 - 9 = ?");
                 }
             } else {
-                sendResponse(chatId, "Будь ласка, введіть команду /start, щоб розпочати.");
+                try {
+                    Long goodsId = Long.parseLong(messageText);
+                    GoodsResponse goodsResponseDTO = goodsService.getGoodsById(goodsId);
+                    sendResponse(chatId, goodsResponseDTO.toString());
+                } catch (NumberFormatException e) {
+                    sendResponse(chatId, "Будь ласка, введіть валідний ID оголошення.");
+                } catch (RuntimeException e) {
+                    sendResponse(chatId, e.getMessage());
+                }
             }
         }
     }
