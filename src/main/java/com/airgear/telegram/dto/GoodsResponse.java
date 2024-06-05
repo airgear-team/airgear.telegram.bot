@@ -1,11 +1,15 @@
 package com.airgear.telegram.dto;
 
+import com.airgear.model.GoodsCondition;
+import com.airgear.model.GoodsStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -15,12 +19,12 @@ public class GoodsResponse {
     private Long id;
     private String name;
     private String description;
-    private BigDecimal priceAmount;
-    private String priceCurrency;
-    private String priceType;
-    private BigDecimal weekendsPriceAmount;
-    private String weekendsPriceCurrency;
-    private String weekendsPriceType;
-    private String location;
-    private String category;
+    private PriceResponse price;
+    @Valid
+    private LocationResponse location;
+    private CategoryResponse category;
+    private String phoneNumber;
+    private GoodsCondition goodsCondition;
+
+    private GoodsStatus status;
 }

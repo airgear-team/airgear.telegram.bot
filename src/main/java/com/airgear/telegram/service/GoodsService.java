@@ -4,21 +4,20 @@ import com.airgear.model.Goods;
 import com.airgear.telegram.dto.GoodsResponse;
 import com.airgear.telegram.mapper.GoodsMapper;
 import com.airgear.telegram.repository.GoodsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
+@RequiredArgsConstructor
 public class GoodsService {
 
-    @Autowired
-    private GoodsRepository goodsRepository;
+    private final GoodsRepository goodsRepository;
+    private final GoodsMapper goodsMapper;
 
-    @Autowired
-    private GoodsMapper goodsMapper;
-
-    public GoodsResponse getGoodsById(Long goodsRequest) {
-        Goods goods = goodsRepository.findById(goodsRequest)
-                .orElseThrow(() -> new RuntimeException("Goods not found"));
-        return goodsMapper.toGoodsResponseDTO(goods);
+    public GoodsResponse getGoodsById(Long id) {
+        Optional<Goods> goodsOptional = goodsRepository.findById(id);
+        return goodsOptional.map(goodsMapper::toGoodsResponseDTO).orElse(null);
     }
 }
