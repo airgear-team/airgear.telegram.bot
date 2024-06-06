@@ -13,7 +13,7 @@
     <groupId>com.airgear.telegram</groupId>
     <artifactId>airgear</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>airgear.location</name>
+    <name>airgear.telegram</name>
 
     <properties>
         <java.version>17</java.version>
@@ -111,18 +111,6 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-security</artifactId>
             <version>${springdoc-openapi.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>html2pdf</artifactId>
-            <version>5.0.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.17.2</version>
         </dependency>
 
         <dependency>
