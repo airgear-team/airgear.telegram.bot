@@ -1,6 +1,6 @@
 package com.airgear.telegram.service;
 
-import com.airgear.model.Goods;
+import com.airgear.model.*;
 import com.airgear.telegram.dto.GoodsResponse;
 import com.airgear.telegram.mapper.GoodsMapper;
 import com.airgear.telegram.repository.GoodsRepository;

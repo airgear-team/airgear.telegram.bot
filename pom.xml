@@ -150,9 +150,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.bithub7</groupId>
+            <groupId>com.github.airgear-team</groupId>
             <artifactId>airgear.model</artifactId>
-            <version>v1.1.9</version>
+            <version>v1.1.16</version>
         </dependency>
 
         <dependency>
