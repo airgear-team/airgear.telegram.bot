@@ -27,37 +27,19 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private GoodsService goodsService;
 
+    private final MessageHandler[] messageHandlers;
+
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String messageText = update.getMessage().getText();
-            long chatId = update.getMessage().getChatId();
-
-            if (messageText.startsWith("/start")) {
-                sendResponse(chatId, "Привіт! Це бот для отримання оголошень. Щоб переконатись, що ви не бот, будь ласка, дайте відповідь на наступне питання: 16 - 9 = ?");
-                awaitingAnswer = true;
-            } else if (awaitingAnswer) {
-                if (messageText.equals("7")) {
-                    sendResponse(chatId, "Відповідь правильна! Тепер ви можете користуватись ботом. Введіть ID оголошення для отримання інформації.");
-                    awaitingAnswer = false;
-                } else {
-                    sendResponse(chatId, "Неправильна відповідь. Спробуйте ще раз: 16 - 9 = ?");
-                }
-            } else {
-                try {
-                    Long goodsId = Long.parseLong(messageText);
-                    GoodsResponse goodsResponseDTO = goodsService.getGoodsById(goodsId);
-                    sendResponse(chatId, goodsResponseDTO.toString());
-                } catch (NumberFormatException e) {
-                    sendResponse(chatId, "Будь ласка, введіть валідний ID оголошення.");
-                } catch (RuntimeException e) {
-                    sendResponse(chatId, e.getMessage());
-                }
+        for (MessageHandler handler : messageHandlers) {
+            if (handler.canHandle(update)) {
+                handler.handle(update, this);
+                return;
             }
         }
     }
 
-    private void sendResponse(long chatId, String text) {
+    public void sendResponse(long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
