@@ -1,7 +1,5 @@
 package com.airgear.telegram.bot;
 
-
-import com.airgear.telegram.dto.GoodsResponse;
 import com.airgear.telegram.service.GoodsService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +25,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private GoodsService goodsService;
 
-    private final MessageHandler[] messageHandlers;
+    @Autowired
+    private MessageHandler[] messageHandlers;
 
     @Override
     public void onUpdateReceived(Update update) {
         for (MessageHandler handler : messageHandlers) {
-            if (handler.canHandle(update)) {
+            if (handler.canHandle(update, this)) {
                 handler.handle(update, this);
                 return;
             }

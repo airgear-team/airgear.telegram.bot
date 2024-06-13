@@ -1,14 +1,17 @@
 package com.airgear.telegram.bot;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.springframework.stereotype.Component;
 
+@Component
 public class StartMessageHandler implements MessageHandler {
 
     @Override
     public void handle(Update update, TelegramBot bot) {
         long chatId = update.getMessage().getChatId();
+        String messageText = update.getMessage().getText();
+
         if (bot.isAwaitingAnswer()) {
-            String messageText = update.getMessage().getText();
             if (messageText.equals("7")) {
                 bot.sendResponse(chatId, "Відповідь правильна! Тепер ви можете користуватись ботом. Введіть ID оголошення для отримання інформації.");
                 bot.setAwaitingAnswer(false);
@@ -22,8 +25,8 @@ public class StartMessageHandler implements MessageHandler {
     }
 
     @Override
-    public boolean canHandle(Update update) {
-        return update.getMessage().getText().startsWith("/start");
+    public boolean canHandle(Update update, TelegramBot bot) {
+        String messageText = update.getMessage().getText();
+        return bot.isAwaitingAnswer() || messageText.startsWith("/start");
     }
 }
-
