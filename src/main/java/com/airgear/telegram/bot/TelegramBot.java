@@ -1,5 +1,6 @@
 package com.airgear.telegram.bot;
 
+import com.airgear.telegram.dto.GoodsResponse;
 import com.airgear.telegram.service.GoodsService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private boolean awaitingAnswer = false;
     private String searchContext = "";
+    private List<GoodsResponse> searchResults = new ArrayList<>();
+    private int currentSearchIndex = 0;
 
     @Autowired
     private GoodsService goodsService;
