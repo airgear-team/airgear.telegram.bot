@@ -24,7 +24,7 @@ public class SearchByIdHandler implements MessageHandler {
             try {
                 Long goodsId = Long.parseLong(messageText);
                 GoodsResponse goodsResponseDTO = bot.getGoodsService().getGoodsById(goodsId);
-                bot.sendResponse(chatId, goodsResponseDTO.toString());
+                bot.sendResponse(chatId, goodsResponseDTO.toFormattedString());
                 sendBackButton(chatId, bot);
             } catch (NumberFormatException e) {
                 bot.sendResponse(chatId, "Будь ласка, введіть валідний ID оголошення.");

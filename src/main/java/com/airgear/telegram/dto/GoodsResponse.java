@@ -23,6 +23,16 @@ public class GoodsResponse {
     private CategoryResponse category;
     private String phoneNumber;
     private GoodsCondition goodsCondition;
-
     private GoodsStatus status;
+
+    public String toFormattedString() {
+        return "Назва: " + name + "\n" +
+                "Опис: " + description + "\n" +
+                "Ціна: " + price.getPriceAmount() + " " + price.getPriceCurrency() + "\n" +
+                "Населений пункт: " + location.getSettlement() + "\n" +
+                "Категорія: " + category.getName() + "\n" +
+                "Телефон: " + phoneNumber + "\n" +
+                "Стан: " + goodsCondition + "\n" +
+                "Статус: " + status;
+    }
 }
