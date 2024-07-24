@@ -1,6 +1,5 @@
 package com.airgear.telegram.bot;
 
-import com.airgear.telegram.bot.TelegramBot;
 import com.airgear.telegram.dto.GoodsResponse;
 import com.airgear.telegram.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
