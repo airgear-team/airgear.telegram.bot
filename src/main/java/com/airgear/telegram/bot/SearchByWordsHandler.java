@@ -1,14 +1,30 @@
 package com.airgear.telegram.bot;
 
+import com.airgear.telegram.bot.TelegramBot;
 import com.airgear.telegram.dto.GoodsResponse;
+import com.airgear.telegram.service.ImageService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class SearchByWordsHandler implements MessageHandler {
+
+    private final ImageService imageService;
+
+    @Autowired
+    public SearchByWordsHandler(ImageService imageService) {
+        this.imageService = imageService;
+    }
 
     @Override
     public void handle(Update update, TelegramBot bot) {
@@ -57,19 +73,42 @@ public class SearchByWordsHandler implements MessageHandler {
         if (currentIndex >= 0 && currentIndex < searchResults.size()) {
             GoodsResponse goods = searchResults.get(currentIndex);
             bot.sendResponse(chatId, goods.toFormattedString());
+            try {
+                Optional<byte[]> imageBytes = imageService.getFirstImageBytesByGoodsId(goods.getId());
+                if (imageBytes.isPresent()) {
+                    sendPhoto(chatId, bot, imageBytes.get());
+                }
+            } catch (IOException e) {
+                bot.sendResponse(chatId, "Не вдалося завантажити зображення.");
+            } catch (TelegramApiException e) {
+                throw new RuntimeException(e);
+            }
             bot.setCurrentSearchIndex(currentIndex);
 
-            List<String> options = Arrays.asList("Попередній", "Наступний", "Назад", "Головне меню");
-            if (currentIndex == 0) {
+            List<String> options;
+            if (currentIndex == 0 && currentIndex == searchResults.size() - 1) {
+                options = Arrays.asList("Назад", "Головне меню");
+            } else if (currentIndex == 0) {
                 options = Arrays.asList("Наступний", "Назад", "Головне меню");
             } else if (currentIndex == searchResults.size() - 1) {
                 options = Arrays.asList("Попередній", "Назад", "Головне меню");
+            } else {
+                options = Arrays.asList("Попередній", "Наступний", "Назад", "Головне меню");
             }
 
-            bot.sendReplyKeyboard(chatId, "Натисніть кнопку для наступної дії:", options);
+            bot.sendReplyKeyboard(chatId, "Виберіть опцію:", options);
         } else {
             bot.sendResponse(chatId, "Більше немає результатів.");
             sendMainMenu(chatId, bot);
         }
+    }
+
+    private void sendPhoto(long chatId, TelegramBot bot, byte[] imageBytes) throws TelegramApiException {
+        InputFile inputFile = new InputFile(new ByteArrayInputStream(imageBytes), "image.jpg");
+        SendPhoto sendPhoto = SendPhoto.builder()
+                .chatId(String.valueOf(chatId))
+                .photo(inputFile)
+                .build();
+        bot.execute(sendPhoto);
     }
 }
