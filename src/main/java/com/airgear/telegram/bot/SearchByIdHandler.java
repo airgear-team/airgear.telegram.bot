@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -72,12 +73,18 @@ public class SearchByIdHandler implements MessageHandler {
     }
 
     private void sendMainMenu(long chatId, TelegramBot bot) {
-        bot.sendReplyKeyboard(chatId, "Оберіть опцію для пошуку:", Arrays.asList("Пошук за ID", "Пошук за словами"));
+        List<List<String>> options = Arrays.asList(
+                Arrays.asList("Пошук за ID", "Пошук за словами")
+        );
+        bot.sendReplyKeyboard(chatId, "Оберіть опцію для пошуку:", options);
         bot.setSearchContext("");
     }
 
     private void sendBackButton(long chatId, TelegramBot bot) {
-        bot.sendReplyKeyboard(chatId, "Натисніть кнопку, щоб повернутися назад:", Collections.singletonList("Назад"));
+        List<List<String>> options = Collections.singletonList(
+                Collections.singletonList("Назад")
+        );
+        bot.sendReplyKeyboard(chatId, "Натисніть кнопку, щоб повернутися назад:", options);
     }
 
     private void sendPhoto(long chatId, TelegramBot bot, byte[] imageBytes) throws TelegramApiException {

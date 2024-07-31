@@ -5,6 +5,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class StartMessageHandler implements MessageHandler {
@@ -38,10 +39,17 @@ public class StartMessageHandler implements MessageHandler {
     }
 
     private void sendReplyKeyboard(long chatId, TelegramBot bot) {
-        bot.sendReplyKeyboard(chatId, "Оберіть відповідь:", Arrays.asList("6", "7", "8", "9"));
+        List<List<String>> options = Arrays.asList(
+                Arrays.asList("6", "7"),
+                Arrays.asList("8", "9")
+        );
+        bot.sendReplyKeyboard(chatId, "Оберіть відповідь:", options);
     }
 
     private void sendOptionsMenu(long chatId, TelegramBot bot) {
-        bot.sendReplyKeyboard(chatId, "Оберіть опцію для пошуку:", Arrays.asList("Пошук за ID", "Пошук за словами"));
+        List<List<String>> options = Arrays.asList(
+                Arrays.asList("Пошук за ID", "Пошук за словами")
+        );
+        bot.sendReplyKeyboard(chatId, "Оберіть опцію для пошуку:", options);
     }
 }

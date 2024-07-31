@@ -58,7 +58,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendReplyKeyboard(long chatId, String text, List<String> options) {
+    public void sendReplyKeyboard(long chatId, String text, List<List<String>> options) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(text);
@@ -69,9 +69,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         keyboardMarkup.setOneTimeKeyboard(true);
 
         List<KeyboardRow> keyboard = new ArrayList<>();
-        for (String option : options) {
+        for (List<String> rowOptions : options) {
             KeyboardRow row = new KeyboardRow();
-            row.add(option);
+            row.addAll(rowOptions);
             keyboard.add(row);
         }
 

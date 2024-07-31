@@ -61,7 +61,10 @@ public class SearchByWordsHandler implements MessageHandler {
     }
 
     private void sendMainMenu(long chatId, TelegramBot bot) {
-        bot.sendReplyKeyboard(chatId, "Оберіть опцію для пошуку:", Arrays.asList("Пошук за ID", "Пошук за словами"));
+        List<List<String>> options = Arrays.asList(
+                Arrays.asList("Пошук за ID", "Пошук за словами")
+        );
+        bot.sendReplyKeyboard(chatId, "Оберіть опцію для пошуку:", options);
         bot.setSearchContext("");
     }
 
@@ -84,15 +87,26 @@ public class SearchByWordsHandler implements MessageHandler {
             }
             bot.setCurrentSearchIndex(currentIndex);
 
-            List<String> options;
+            List<List<String>> options;
             if (currentIndex == 0 && currentIndex == searchResults.size() - 1) {
-                options = Arrays.asList("Назад", "Головне меню");
+                options = Arrays.asList(
+                        Arrays.asList("Назад", "Головне меню")
+                );
             } else if (currentIndex == 0) {
-                options = Arrays.asList("Наступний", "Назад", "Головне меню");
+                options = Arrays.asList(
+                        Arrays.asList("Наступний"),
+                        Arrays.asList("Назад", "Головне меню")
+                );
             } else if (currentIndex == searchResults.size() - 1) {
-                options = Arrays.asList("Попередній", "Назад", "Головне меню");
+                options = Arrays.asList(
+                        Arrays.asList("Попередній"),
+                        Arrays.asList("Назад", "Головне меню")
+                );
             } else {
-                options = Arrays.asList("Попередній", "Наступний", "Назад", "Головне меню");
+                options = Arrays.asList(
+                        Arrays.asList("Попередній", "Наступний"),
+                        Arrays.asList("Назад", "Головне меню")
+                );
             }
 
             bot.sendReplyKeyboard(chatId, "Виберіть опцію:", options);
