@@ -40,17 +40,22 @@ public class SearchByIdHandler implements MessageHandler {
             try {
                 Long goodsId = Long.parseLong(messageText);
                 GoodsResponse goodsResponseDTO = bot.getGoodsService().getGoodsById(goodsId);
-                bot.sendResponse(chatId, goodsResponseDTO.toFormattedString());
 
-                try {
-                    Optional<byte[]> imageBytes = imageService.getFirstImageBytesByGoodsId(goodsId);
-                    if (imageBytes.isPresent()) {
-                        sendPhoto(chatId, bot, imageBytes.get());
+                if (goodsResponseDTO != null) {
+                    bot.sendResponse(chatId, goodsResponseDTO.toFormattedString());
+
+                    try {
+                        Optional<byte[]> imageBytes = imageService.getFirstImageBytesByGoodsId(goodsId);
+                        if (imageBytes.isPresent()) {
+                            sendPhoto(chatId, bot, imageBytes.get());
+                        }
+                    } catch (IOException e) {
+                        bot.sendResponse(chatId, "Не вдалося завантажити зображення.");
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
                     }
-                } catch (IOException e) {
-                    bot.sendResponse(chatId, "Не вдалося завантажити зображення.");
-                } catch (TelegramApiException e) {
-                    throw new RuntimeException(e);
+                } else {
+                    bot.sendResponse(chatId, "Товар з ID " + goodsId + " не знайдено.");
                 }
 
                 sendBackButton(chatId, bot);
