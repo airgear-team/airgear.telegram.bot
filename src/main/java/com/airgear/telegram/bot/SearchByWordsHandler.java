@@ -87,33 +87,38 @@ public class SearchByWordsHandler implements MessageHandler {
             }
             bot.setCurrentSearchIndex(currentIndex);
 
-            List<List<String>> options;
-            if (currentIndex == 0 && currentIndex == searchResults.size() - 1) {
-                options = Arrays.asList(
-                        Arrays.asList("Назад", "Головне меню")
-                );
-            } else if (currentIndex == 0) {
-                options = Arrays.asList(
-                        Arrays.asList("Наступний"),
-                        Arrays.asList("Назад", "Головне меню")
-                );
-            } else if (currentIndex == searchResults.size() - 1) {
-                options = Arrays.asList(
-                        Arrays.asList("Попередній"),
-                        Arrays.asList("Назад", "Головне меню")
-                );
-            } else {
-                options = Arrays.asList(
-                        Arrays.asList("Попередній", "Наступний"),
-                        Arrays.asList("Назад", "Головне меню")
-                );
-            }
+            List<List<String>> options = getLists(currentIndex, searchResults);
 
             bot.sendReplyKeyboard(chatId, "Виберіть опцію:", options);
         } else {
             bot.sendResponse(chatId, "Більше немає результатів.");
             sendMainMenu(chatId, bot);
         }
+    }
+
+    private static List<List<String>> getLists(int currentIndex, List<GoodsResponse> searchResults) {
+        List<List<String>> options;
+        if (currentIndex == 0 && currentIndex == searchResults.size() - 1) {
+            options = Arrays.asList(
+                    Arrays.asList("Назад", "Головне меню")
+            );
+        } else if (currentIndex == 0) {
+            options = Arrays.asList(
+                    Arrays.asList("Наступний"),
+                    Arrays.asList("Назад", "Головне меню")
+            );
+        } else if (currentIndex == searchResults.size() - 1) {
+            options = Arrays.asList(
+                    Arrays.asList("Попередній"),
+                    Arrays.asList("Назад", "Головне меню")
+            );
+        } else {
+            options = Arrays.asList(
+                    Arrays.asList("Попередній", "Наступний"),
+                    Arrays.asList("Назад", "Головне меню")
+            );
+        }
+        return options;
     }
 
     private void sendPhoto(long chatId, TelegramBot bot, byte[] imageBytes) throws TelegramApiException {
