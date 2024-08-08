@@ -1,55 +1,83 @@
 package com.airgear.telegram.bot;
 
+import com.airgear.model.User;
+import com.airgear.telegram.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.util.Arrays;
-import java.util.List;
-
 @Component
 public class StartMessageHandler implements MessageHandler {
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public void handle(Update update, TelegramBot bot) {
         Message message = update.getMessage();
         long chatId = message.getChatId();
-        String messageText = message.getText();
 
-        if (bot.isAwaitingAnswer()) {
-            if (messageText.equals("7")) {
-                bot.sendResponse(chatId, "Відповідь правильна! Тепер ви можете обрати, що саме робити далі.");
-                bot.setAwaitingAnswer(false);
-                sendOptionsMenu(chatId, bot);
+        if (message.hasContact()) {
+            handleContact(message.getContact(), chatId, bot);
+        } else if (message.hasText()) {
+            String text = message.getText();
+            if (bot.getUserSession(chatId) == null) {
+                if (text.startsWith("/start")) {
+                    bot.sendResponse(chatId, "Привіт! Щоб продовжити, будь ласка, поділіться своїм номером телефону:");
+                    bot.sendContactRequest(chatId);
+                }
             } else {
-                bot.sendResponse(chatId, "Неправильна відповідь. Спробуйте ще раз: 16 - 9 = ?");
-                sendReplyKeyboard(chatId, bot);
+                handleTextMessage(text, chatId, bot);
             }
-        } else {
-            bot.sendResponse(chatId, "Привіт! Це бот для отримання оголошень. Щоб переконатись, що ви не бот, будь ласка, дайте відповідь на наступне питання: 16 - 9 = ?");
-            bot.setAwaitingAnswer(true);
-            sendReplyKeyboard(chatId, bot);
         }
     }
 
     @Override
     public boolean canHandle(Update update, TelegramBot bot) {
         Message message = update.getMessage();
-        return bot.isAwaitingAnswer() || (message != null && message.getText().startsWith("/start"));
+        return message != null && (message.hasContact() || (message.hasText() && message.getText().startsWith("/start")));
     }
 
-    private void sendReplyKeyboard(long chatId, TelegramBot bot) {
-        List<List<String>> options = Arrays.asList(
-                Arrays.asList("6", "7"),
-                Arrays.asList("8", "9")
-        );
-        bot.sendReplyKeyboard(chatId, "Оберіть відповідь:", options);
+    private void handleContact(Contact contact, long chatId, TelegramBot bot) {
+        String phoneNumber = contact.getPhoneNumber();
+        String userName = contact.getFirstName() + " " + contact.getLastName();
+
+        User user = userService.findByPhoneNumber(phoneNumber);
+        if (user == null) {
+            bot.addUserSession(chatId, "awaiting_name|" + phoneNumber + "|" + userName);
+            bot.sendResponse(chatId, "Користувача не знайдено. Будь ласка, введіть своє ім'я:");
+        } else {
+            bot.addUserSession(chatId, phoneNumber);
+            bot.sendResponse(chatId, "Авторизація успішна! Тепер ви можете користуватися ботом.");
+            bot.sendOptionsMenu(chatId);
+        }
     }
 
-    private void sendOptionsMenu(long chatId, TelegramBot bot) {
-        List<List<String>> options = Arrays.asList(
-                Arrays.asList("Пошук за ID", "Пошук за словами")
-        );
-        bot.sendReplyKeyboard(chatId, "Оберіть опцію для пошуку:", options);
+    private void handleTextMessage(String text, long chatId, TelegramBot bot) {
+        String sessionData = bot.getUserSession(chatId);
+        if (sessionData.startsWith("awaiting_name|")) {
+            String[] parts = sessionData.split("\\|");
+            String phoneNumber = parts[1];
+            String userName = parts[2];
+            bot.addUserSession(chatId, "awaiting_email|" + phoneNumber + "|" + text);
+            bot.sendResponse(chatId, "Будь ласка, введіть свій email:");
+        } else if (sessionData.startsWith("awaiting_email|")) {
+            String[] parts = sessionData.split("\\|");
+            String phoneNumber = parts[1];
+            String userName = parts[2];
+            bot.addUserSession(chatId, "awaiting_password|" + phoneNumber + "|" + userName + "|" + text);
+            bot.sendResponse(chatId, "Будь ласка, введіть свій пароль:");
+        } else if (sessionData.startsWith("awaiting_password|")) {
+            String[] parts = sessionData.split("\\|");
+            String phoneNumber = parts[1];
+            String userName = parts[2];
+            String email = parts[3];
+            userService.registerUser(phoneNumber, userName, email, text);
+            bot.getUserSessions().remove(chatId);
+            bot.sendResponse(chatId, "Реєстрація успішна! Тепер ви можете користуватися ботом.");
+            bot.sendOptionsMenu(chatId);
+        }
     }
 }

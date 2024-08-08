@@ -74,8 +74,16 @@ public class SearchByIdHandler implements MessageHandler {
 
     @Override
     public boolean canHandle(Update update, TelegramBot bot) {
-        return update.getMessage().getText().equals("Пошук за ID") || bot.getSearchContext().equals("searchById");
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            String messageText = update.getMessage().getText();
+            if ("Пошук за ID".equals(messageText)) {
+                return true;
+            }
+        }
+        String searchContext = bot.getSearchContext();
+        return "searchById".equals(searchContext);
     }
+
 
     private void sendMainMenu(long chatId, TelegramBot bot) {
         List<List<String>> options = Arrays.asList(
