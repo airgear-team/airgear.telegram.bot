@@ -30,6 +30,11 @@ public class SearchByWordsHandler implements MessageHandler {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
 
+        if (!isAuthorized(bot, chatId)) {
+            bot.sendResponse(chatId, "Вам потрібно авторизуватися для використання цієї функції.");
+            return;
+        }
+
         if (messageText.equals("Назад")) {
             sendMainMenu(chatId, bot);
             return;
@@ -67,6 +72,10 @@ public class SearchByWordsHandler implements MessageHandler {
         return "searchByWords".equals(searchContext);
     }
 
+    private boolean isAuthorized(TelegramBot bot, long chatId) {
+        String sessionData = bot.getUserSession(chatId);
+        return sessionData != null && !sessionData.startsWith("awaiting_");
+    }
 
     private void sendMainMenu(long chatId, TelegramBot bot) {
         List<List<String>> options = Arrays.asList(
