@@ -6,6 +6,7 @@ import com.airgear.model.UserStatus;
 import com.airgear.telegram.repository.UserRepository;
 import com.airgear.telegram.utils.PhoneNumberUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -14,9 +15,11 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public User findByPhoneNumber(String phoneNumber) {
         String normalizedPhone = PhoneNumberUtils.normalizePhoneNumberForSearch(phoneNumber);
@@ -28,7 +31,7 @@ public class UserService {
         user.setPhone(PhoneNumberUtils.normalizePhoneNumberForSearch(phone));
         user.setName(userName);
         user.setEmail(email);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         user.setRoles(createRoles());
         user.setStatus(UserStatus.ACTIVE);
         user.setCreatedAt(OffsetDateTime.now());
