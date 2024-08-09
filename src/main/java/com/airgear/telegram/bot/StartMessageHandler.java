@@ -23,11 +23,8 @@ public class StartMessageHandler implements MessageHandler {
             handleContact(message.getContact(), chatId, bot);
         } else if (message.hasText()) {
             String text = message.getText();
-            if (bot.getUserSession(chatId) == null) {
-                if (text.startsWith("/start")) {
-                    bot.sendResponse(chatId, "Привіт! Щоб продовжити, будь ласка, поділіться своїм номером телефону:");
-                    bot.sendContactRequest(chatId);
-                }
+            if (text.startsWith("/start")) {
+                handleStartCommand(chatId, bot);
             } else {
                 handleTextMessage(text, chatId, bot);
             }
@@ -37,7 +34,13 @@ public class StartMessageHandler implements MessageHandler {
     @Override
     public boolean canHandle(Update update, TelegramBot bot) {
         Message message = update.getMessage();
-        return message != null && (message.hasContact() || (message.hasText() && message.getText().startsWith("/start")));
+        return message != null && (message.hasContact() || (message.hasText() && (message.getText().startsWith("/start") || bot.getUserSession(message.getChatId()) != null)));
+    }
+
+    private void handleStartCommand(long chatId, TelegramBot bot) {
+        bot.addUserSession(chatId, "new_session");
+        bot.sendResponse(chatId, "Привіт! Щоб продовжити, будь ласка, поділіться своїм номером телефону:");
+        bot.sendContactRequest(chatId);
     }
 
     private void handleContact(Contact contact, long chatId, TelegramBot bot) {
@@ -49,7 +52,7 @@ public class StartMessageHandler implements MessageHandler {
             bot.addUserSession(chatId, "awaiting_name|" + phoneNumber + "|" + userName);
             bot.sendResponse(chatId, "Користувача не знайдено. Будь ласка, введіть своє ім'я:");
         } else {
-            bot.addUserSession(chatId, phoneNumber);
+            bot.addUserSession(chatId, "authenticated|" + phoneNumber);
             bot.sendResponse(chatId, "Авторизація успішна! Тепер ви можете користуватися ботом.");
             bot.sendOptionsMenu(chatId);
         }
@@ -57,27 +60,40 @@ public class StartMessageHandler implements MessageHandler {
 
     private void handleTextMessage(String text, long chatId, TelegramBot bot) {
         String sessionData = bot.getUserSession(chatId);
+
+        if (sessionData == null) {
+            bot.sendResponse(chatId, "Сесія не знайдена. Будь ласка, спробуйте ще раз.");
+            return;
+        }
+
         if (sessionData.startsWith("awaiting_name|")) {
             String[] parts = sessionData.split("\\|");
             String phoneNumber = parts[1];
-            String userName = parts[2];
             bot.addUserSession(chatId, "awaiting_email|" + phoneNumber + "|" + text);
             bot.sendResponse(chatId, "Будь ласка, введіть свій email:");
+
         } else if (sessionData.startsWith("awaiting_email|")) {
             String[] parts = sessionData.split("\\|");
             String phoneNumber = parts[1];
             String userName = parts[2];
             bot.addUserSession(chatId, "awaiting_password|" + phoneNumber + "|" + userName + "|" + text);
             bot.sendResponse(chatId, "Будь ласка, введіть свій пароль:");
+
         } else if (sessionData.startsWith("awaiting_password|")) {
             String[] parts = sessionData.split("\\|");
             String phoneNumber = parts[1];
             String userName = parts[2];
             String email = parts[3];
             userService.registerUser(phoneNumber, userName, email, text);
-            bot.getUserSessions().remove(chatId);
+            bot.addUserSession(chatId, "authenticated|" + phoneNumber);
             bot.sendResponse(chatId, "Реєстрація успішна! Тепер ви можете користуватися ботом.");
             bot.sendOptionsMenu(chatId);
+
+        } else if (sessionData.startsWith("authenticated|")) {
+            bot.sendResponse(chatId, "Ви вже авторизовані. Якщо потрібно щось інше, напишіть нам.");
+
+        } else {
+            bot.sendResponse(chatId, "Невідомий стан сесії.");
         }
     }
 }
