@@ -87,6 +87,10 @@ public class StartMessageHandler implements MessageHandler {
             bot.sendResponse(chatId, "Будь ласка, введіть свій пароль:");
 
         } else if (sessionData.startsWith("awaiting_password|")) {
+            if (!isValidPassword(text)) {
+                bot.sendResponse(chatId, "Пароль має містити не менше 8 символів, одну цифру, одну велику і одну малу літеру. Будь ласка, введіть коректний пароль:");
+                return;
+            }
             String[] parts = sessionData.split("\\|");
             String phoneNumber = parts[1];
             String userName = parts[2];
@@ -108,6 +112,13 @@ public class StartMessageHandler implements MessageHandler {
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+    private boolean isValidPassword(String password) {
+        String passwordRegex = "^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{8,}$";
+        Pattern pattern = Pattern.compile(passwordRegex);
+        Matcher matcher = pattern.matcher(password);
         return matcher.matches();
     }
 }
