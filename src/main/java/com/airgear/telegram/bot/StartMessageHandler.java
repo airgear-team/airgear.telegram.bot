@@ -8,6 +8,9 @@ import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Component
 public class StartMessageHandler implements MessageHandler {
 
@@ -73,6 +76,10 @@ public class StartMessageHandler implements MessageHandler {
             bot.sendResponse(chatId, "Будь ласка, введіть свій email:");
 
         } else if (sessionData.startsWith("awaiting_email|")) {
+            if (!isValidEmail(text)) {
+                bot.sendResponse(chatId, "Невірний формат email. Будь ласка, введіть коректний email:");
+                return;
+            }
             String[] parts = sessionData.split("\\|");
             String phoneNumber = parts[1];
             String userName = parts[2];
@@ -95,5 +102,12 @@ public class StartMessageHandler implements MessageHandler {
         } else {
             bot.sendResponse(chatId, "Невідомий стан сесії.");
         }
+    }
+
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 }
