@@ -4,7 +4,8 @@ import com.airgear.telegram.dto.GoodsResponse;
 import com.airgear.telegram.service.GoodsService;
 import com.airgear.telegram.service.UserService;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,8 +18,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.*;
 
+@EqualsAndHashCode(callSuper = true)
 @Component
 @Data
+@RequiredArgsConstructor
 public class TelegramBot extends TelegramLongPollingBot {
 
     @Value("${telegrambots.bot.username}")
@@ -34,19 +37,13 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private final Map<Long, String> userSessions = new HashMap<>();
 
-    @Autowired
-    private GoodsService goodsService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private MessageHandler[] messageHandlers;
+    private final GoodsService goodsService;
+    private final UserService userService;
+    private final MessageHandler[] messageHandlers;
 
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage()) {
-            long chatId = update.getMessage().getChatId();
             for (MessageHandler handler : messageHandlers) {
                 if (handler.canHandle(update, this)) {
                     handler.handle(update, this);

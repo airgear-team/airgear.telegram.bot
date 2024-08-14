@@ -2,7 +2,7 @@ package com.airgear.telegram.bot;
 
 import com.airgear.model.User;
 import com.airgear.telegram.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -12,10 +12,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
+@RequiredArgsConstructor
 public class StartMessageHandler implements MessageHandler {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @Override
     public void handle(Update update, TelegramBot bot) {

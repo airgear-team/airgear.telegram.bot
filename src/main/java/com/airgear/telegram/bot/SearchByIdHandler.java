@@ -2,7 +2,7 @@ package com.airgear.telegram.bot;
 
 import com.airgear.telegram.dto.GoodsResponse;
 import com.airgear.telegram.service.ImageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -17,14 +17,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class SearchByIdHandler implements MessageHandler {
 
     private final ImageService imageService;
-
-    @Autowired
-    public SearchByIdHandler(ImageService imageService) {
-        this.imageService = imageService;
-    }
 
     @Override
     public void handle(Update update, TelegramBot bot) {
@@ -33,6 +29,7 @@ public class SearchByIdHandler implements MessageHandler {
 
         if (!isAuthorized(bot, chatId)) {
             bot.sendResponse(chatId, "Вам потрібно авторизуватися для використання цієї функції.");
+            bot.sendContactRequest(chatId);
             return;
         }
 
