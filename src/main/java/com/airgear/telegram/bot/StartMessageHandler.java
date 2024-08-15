@@ -101,7 +101,7 @@ public class StartMessageHandler implements MessageHandler {
             bot.sendOptionsMenu(chatId);
 
         } else if (sessionData.startsWith("authenticated|")) {
-            bot.sendResponse(chatId, "Ви вже авторизовані. Якщо потрібно щось інше, напишіть нам.");
+            bot.sendOptionsMenu(chatId);
 
         } else {
             bot.sendResponse(chatId, "Невідомий стан сесії.");

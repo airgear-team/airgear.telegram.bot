@@ -1,8 +1,10 @@
 package com.airgear.telegram.bot;
 
+import com.airgear.model.TelegramUserSession;
 import com.airgear.telegram.dto.GoodsResponse;
 import com.airgear.telegram.service.GoodsService;
 import com.airgear.telegram.service.UserService;
+import com.airgear.telegram.service.UserSessionService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 @EqualsAndHashCode(callSuper = true)
@@ -39,7 +42,16 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private final GoodsService goodsService;
     private final UserService userService;
+    private final UserSessionService userSessionService;
     private final MessageHandler[] messageHandlers;
+
+    @PostConstruct
+    private void initUserSessions() {
+        List<TelegramUserSession> sessions = userSessionService.getAllSessions();
+        for (TelegramUserSession session : sessions) {
+            userSessions.put(session.getChatId(), session.getSessionData());
+        }
+    }
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -130,6 +142,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     public void addUserSession(long chatId, String sessionData) {
         userSessions.put(chatId, sessionData);
+        userSessionService.saveSession(new TelegramUserSession(chatId, sessionData));
     }
 
     public String getUserSession(long chatId) {
