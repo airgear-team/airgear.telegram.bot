@@ -19,4 +19,8 @@ public class UserSessionService {
     public List<TelegramUserSession> getAllSessions() {
         return userSessionRepository.findAll();
     }
+
+    public void deleteSession(long chatId) {
+        userSessionRepository.deleteById(chatId);
+    }
 }
